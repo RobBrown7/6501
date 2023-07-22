@@ -1,0 +1,19 @@
+Week 3 Transformation
+
+This week, the assignment is divided into two parts: code and paper. In the code part of the assignment, you will use the cleaned dataset to perform some necessary data transformations using Python. Specifically, some columns are known to have issues. You will also document your process in the paper part of the assignment per the instructions below.
+
+Part 1: Code
+
+Write the code needed to accomplish each of the transformation methods required for the data set.
+
+Part 2: Paper
+
+Explain the purpose of the following transformation techniques: data type conversion, one-hot encoding, and feature scaling. Also, describe the difference between standardization and normalization and how each method can improve the accuracy of the linear and logistic regression models.
+Describe the specific transformations that were necessary to ensure the data is ready for analysis and add an annotated screenshot that shows an example of each transformation performed.
+Provide a list of the transformation techniques that were performed, and the specific steps taken to transform the data.
+Describe how the transformed dataset will be better suited to address the problem statement and business objectives.
+Length: 3 to 5-page paper, plus complete Python notebook file, and transformed data file (CSV)
+
+References: Include a minimum of 3 scholarly resources.
+
+The completed assignment should address all of the assignment requirements, exhibit evidence of concept knowledge, and demonstrate thoughtful consideration of the content presented in the course. The writing should integrate scholarly resources, reflect academic expectations and current APA standards, and adhere to Northcentral University
