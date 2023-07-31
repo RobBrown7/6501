@@ -1,0 +1,169 @@
+# Suds Load and Clean Dataset #----------------------------
+# Load the packages
+install.packages("plyr")
+install.packages("dplyr")
+
+# Load necessary libraries
+library(plyr)
+library(dplyr)
+
+#----------------------------
+
+# Create suds_df dataframe from csv dataset
+suds_df <- TIM_6501_SUDS_dataset
+
+
+# Initial snapshot of the data
+summary(suds_df)
+
+# Check for missing values
+sum(is.na(suds_df))
+
+#----------------------------
+
+# Remove rows with missing data
+suds_clean_2df <- na.omit(suds_df)
+
+# Initial snapshot of the data
+summary(suds_clean_2df)
+
+# Check for missing values
+sum(is.na(suds_clean_2df))
+
+# Check values to this point
+summary(suds_clean_2df)
+
+#----------------------------
+
+# Write to CSV
+write.csv(suds_clean_2df, "suds_clean_3df.csv", row.names = FALSE)
+
+#---------------------------- Remap character values to numeric values 
+# The following columns: job_type, marital_status, education_level, bad_credit, mortgage, credit_cards,contact_type, contact_month, & contact_weekday 
+# all need values changed to numeric for visualization and analysis
+
+#----------------------------job_type###!!!!!!!!!!!!!! Stop here this erased all the values
+# Define a mapping from the original values to the new values
+mapping <- c("adminstrative" = 1, "laborer"= 2, "technician"= 3, "services"= 4, "management"= 5, "retired"= 6, "entrepreneur"= 7,"self-employed"= 8, "housekeeping"= 9, "unemployed"= 10, "student"= 11, "unknown"= 12)
+
+# Convert the job_type column to a factor
+suds_clean_2df$job_type <- as.factor(suds_clean_2df$job_type)
+
+# Change the levels of the factor
+levels(suds_clean_2df$job_type) <- mapping
+
+# Check the unique values in the job_type column
+print(unique(suds_clean_2df$job_type))
+
+#---------------------------- marital_status
+# Define a mapping from the original values to the new values
+mapping <- c("unknown" = 0, "single" = 1, "married" = 2, "divorced" = 3)
+
+# Use revalue() to replace the original values with the new values
+suds_clean_2df$marital_status <- revalue(suds_clean_2df$marital_status, mapping)
+
+# Convert the column to numeric
+suds_clean_2df$marital_status <- as.numeric(suds_clean_2df$marital_status)
+
+print(unique(suds_clean_2df$marital_status))
+
+#---------------------------- education_level
+# Define a mapping from the original values to the new values
+mapping <- c("elementary" = 1, "unknown" = 0, "university" = 4, "high school" = 2, "trade school" = 3)
+
+# Use revalue() to replace the original values with the new values
+suds_clean_2df$education_level <- revalue(suds_clean_2df$education_level, mapping)
+
+# Convert the column to numeric
+suds_clean_2df$education_level <- as.numeric(suds_clean_2df$education_level)
+
+print(unique(suds_clean_2df$education_level))
+
+#---------------------------- bad_credit
+# Define a mapping from the original values to the new values
+mapping <- c("yes" = 1, "no" = 0, "unknown" = 3)
+
+# Use revalue() to replace the original values with the new values
+suds_clean_2df$bad_credit <- revalue(suds_clean_2df$bad_credit, mapping)
+
+# Convert a factor to numeric
+suds_clean_2df$bad_credit <- as.numeric(factor(suds_clean_2df$bad_credit, levels = unique(suds_clean_2df$bad_credit)))
+
+print(unique(suds_clean_2df$bad_credit))
+
+#---------------------------- mortgage
+# Define a mapping from the original values to the new values
+mapping <- c("yes" = 1, "no" = 0, "unknown" = 3)
+
+# Use revalue() to replace the original values with the new values
+suds_clean_2df$mortgage <- revalue(suds_clean_2df$mortgage, mapping)
+
+# Convert a factor to numeric
+suds_clean_2df$mortgage <- as.numeric(factor(suds_clean_2df$mortgage, levels = unique(suds_clean_2df$mortgage)))
+
+print(unique(suds_clean_2df$mortgage))
+
+#---------------------------- credit_cards
+# Define a mapping from the original values to the new values
+mapping <- c("yes" = 1, "no" = 0, "unknown" = 3)
+
+# Use revalue() to replace the original values with the new values
+suds_clean_2df$credit_cards <- revalue(suds_clean_2df$credit_cards, mapping)
+
+# Convert a factor to numeric
+suds_clean_2df$credit_cards <- as.numeric(factor(suds_clean_2df$credit_cards, levels = unique(suds_clean_2df$credit_cards)))
+
+print(unique(suds_clean_2df$credit_cards))
+
+#---------------------------- contact_type
+# Define a mapping from the original values to the new values
+mapping <- c("email" = 0, "mobile" = 1)
+
+# Use revalue() to replace the original values with the new values
+suds_clean_2df$contact_type <- revalue(suds_clean_2df$contact_type, mapping)
+
+# Convert the column to numeric
+suds_clean_2df$contact_type <- as.numeric(suds_clean_2df$contact_type)
+
+print(unique(suds_clean_2df$contact_type))
+
+#---------------------------- contact_month
+# Create a named vector that maps the day names to their numeric values
+day_mapping <- c("aug" = 08, "nov"= 11, "jun"= 06, "apr"= 04, "jul"= 07, "may"= 05, "oct"= 10, "mar"= 03, "sep"= 09, "dec"= 12)
+
+# Replace the day names with their numeric values
+suds_clean_2df$contact_month <- day_mapping[suds_clean_2df$contact_month]
+
+# Convert the column to numeric
+suds_clean_2df$contact_month <- as.numeric(suds_clean_2df$contact_month)
+
+print(unique(suds_clean_2df$contact_month))
+
+#---------------------------- contact_weekday
+# Create a named vector that maps the day names to their numeric values
+day_mapping <- c("sun" = 1, "mon" = 2, "tue" = 3, "wed" = 4, "thu" = 5, "fri" = 6, "sat" = 7)
+
+# Replace the day names with their numeric values
+suds_clean_2df$contact_weekday <- day_mapping[suds_clean_2df$contact_weekday]
+
+# Convert the column to numeric
+suds_clean_2df$contact_weekday <- as.numeric(suds_clean_2df$contact_weekday)
+
+print(unique(suds_clean_2df$contact_weekday))
+
+#----------------------------
+
+summary(suds_clean_2df)
+
+#----------------------------
+
+# Write to CSV
+write.csv(suds_clean_2df, "suds_clean_2df_converted.csv", row.names = FALSE)
+
+#----------------------------
+
+# Subset the data for job_type1
+data_job_type1 <- subset(suds_clean_2df, job_type == 1)
+
+# Print the first few rows of the new dataframe
+head(data_job_type1)
