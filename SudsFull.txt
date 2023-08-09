@@ -1,0 +1,247 @@
+# install necessary packages
+install.packages("modeest") # for mode calculation
+install.packages("corrplot")
+install.packages("plotly")
+install.packages("moments")
+
+# install and load the libraries
+library(plotly)
+library(modeest)
+library(corrplot)
+library(moments)
+
+# Set the working directory then read and create the dataframe from the CSV file
+setwd("C:/Users/RobBrown/OneDrive/01. NCU/04. TIM6501/Week 4/R Scripts")
+suds_clean_2df_scaled <- read.csv('suds_clean_2df_scaled.csv')
+
+# define the function to calculate the mode to return a value of a numerical vector
+getmode <- function(v) {
+  mlv(as.numeric(v), method = "mfv")
+}
+# Summary and display the first few rows of dataset
+summary(suds_clean_2df_scaled)
+head(suds_clean_2df_scaled)
+#----------------------------
+# This section was the original method of obtaining
+# now calculate the summary statistics for each numeric column
+# mean
+#mean_vals <- sapply(suds_clean_2df_scaled, mean, na.rm = TRUE)
+
+# median
+#median_vals <- sapply(suds_clean_2df_scaled, median, na.rm = TRUE)
+
+# mode
+#mode_vals <- sapply(suds_clean_2df_scaled, getmode)
+
+# variance
+#variance_vals <- sapply(suds_clean_2df_scaled, var, na.rm = TRUE)
+
+# standard deviation
+#sd_vals <- sapply(suds_clean_2df_scaled, sd, na.rm = TRUE)
+
+# skewness
+#skewness_vals <- sapply(suds_clean_2df_scaled, moments::skewness, na.rm = TRUE)
+
+# quantiles
+#quantiles_vals <- sapply(suds_clean_2df_scaled, function(column) quantile(column, na.rm = TRUE))
+
+# range
+#range_vals <- sapply(suds_clean_2df_scaled, function(column) diff(range(column, na.rm = TRUE)))
+
+#----------------------------refined method from above
+
+# calculate the statistic values
+stats_list <- list(
+  Mean = sapply(suds_clean_2df_scaled, mean, na.rm = TRUE),
+  Median = sapply(suds_clean_2df_scaled, median, na.rm = TRUE),
+  Mode = sapply(suds_clean_2df_scaled, getmode),
+  Variance = sapply(suds_clean_2df_scaled, var, na.rm = TRUE),
+  SD = sapply(suds_clean_2df_scaled, sd, na.rm = TRUE),
+  Skewness = sapply(suds_clean_2df_scaled, moments::skewness, na.rm = TRUE),
+  Range = sapply(suds_clean_2df_scaled, function(column) diff(range(column, na.rm = TRUE)))
+)
+
+# convert list to data frame
+stats_df <- do.call(rbind, stats_list)
+
+# print the data frame
+print(stats_df)
+
+#---------------------------- First Correlation Matrix creation and plotting
+
+# correlation matrix
+correlation_matrix <- cor(suds_clean_2df_scaled, use = "complete.obs")
+corrplot(correlation_matrix, method = "color")
+
+# Plotly Heat map of the correlating factors
+plot_ly(x = rownames(correlation_matrix), 
+        y = colnames(correlation_matrix), 
+        z = correlation_matrix, 
+        type = "heatmap")
+
+# Assume p is your plotly object
+p <- plot_ly(x = rownames(correlation_matrix),
+             y = colnames(correlation_matrix),
+             z = correlation_matrix,
+             type = "heatmap")
+
+# Save the plotly graph to an HTML file
+# Save the plotly graph to an HTML file
+htmlwidgets::saveWidget(p, "Correlation_Matrix_Heatmap_Suds_Carwash2.html")
+
+# Convert the correlation matrix to a long format dataframe
+correlation_df <- as.data.frame(as.table(correlation_matrix))
+
+# Give the columns appropriate names
+colnames(correlation_df) <- c("Variable1", "Variable2", "Correlation")
+
+# Remove correlations of a variable with itself
+correlation_df <- correlation_df[correlation_df$Variable1 != correlation_df$Variable2, ]
+
+# Split positive and negative correlations
+positive_correlations <- correlation_df[correlation_df$Correlation > 0, ]
+negative_correlations <- correlation_df[correlation_df$Correlation < 0, ]
+
+# Sort and get top correlations
+top_positive_correlations <- positive_correlations[order(-positive_correlations$Correlation), ]
+top_negative_correlations <- negative_correlations[order(negative_correlations$Correlation), ]
+
+# You can change the number in head() to get more or fewer top correlations
+top_positive_correlations <- head(top_positive_correlations, 5)
+top_negative_correlations <- head(top_negative_correlations, 5)
+
+# Print top positive correlations
+top_positive_correlations
+
+# Print top negative correlations
+top_negative_correlations
+
+# Write top positive correlations to a CSV file
+write.csv(top_positive_correlations, "top_positive_correlations2.csv", row.names = FALSE)
+
+# Write top negative correlations to a CSV file
+write.csv(top_negative_correlations, "top_negative_correlations2.csv", row.names = FALSE)
+
+#---------------------------- Bar Plot
+# Create a bar plot for 'contact_type'
+barplot(table(as.factor(suds_clean_2df_scaled[,"contact_type"])), main="Bar Plot of Contact Type", xlab="Contact Type")
+
+#---------------------------- Second Correlation Analysis creation and plotting
+
+# Extract 'subscribed' correlations
+subscribed_correlations <- correlation_matrix[,'subscribed']
+
+# Convert to data frame
+subscribed_correlations <- as.data.frame(subscribed_correlations)
+
+# Reset row names
+rownames(subscribed_correlations) <- NULL
+
+# Rename column
+names(subscribed_correlations) <- "Correlation"
+
+# Add a column for Variable names
+subscribed_correlations$Variable <- rownames(correlation_matrix)
+
+# Remove the correlation of 'subscribed' with itself
+subscribed_correlations <- subscribed_correlations[subscribed_correlations$Variable != 'subscribed', ]
+
+# Reorder the columns for clarity
+subscribed_correlations <- subscribed_correlations[,c('Variable', 'Correlation')]
+
+# Split into positive and negative correlations
+positive_correlations_subscribed <- subscribed_correlations[subscribed_correlations$Correlation > 0, ]
+negative_correlations_subscribed <- subscribed_correlations[subscribed_correlations$Correlation < 0, ]
+
+# Sort and get top correlations
+top_positive_correlations_subscribed <- positive_correlations_subscribed[order(-positive_correlations_subscribed$Correlation), ]
+top_negative_correlations_subscribed <- negative_correlations_subscribed[order(negative_correlations_subscribed$Correlation), ]
+
+# Get top 5 correlations
+top_5_positive_correlations_subscribed <- head(top_positive_correlations_subscribed, 5)
+top_5_negative_correlations_subscribed <- head(top_negative_correlations_subscribed, 5)
+
+# Print the top 5 positive and negative correlations
+print(top_5_positive_correlations_subscribed)
+print(top_5_negative_correlations_subscribed)
+
+# Write top positive correlations to a CSV file
+write.csv(top_positive_correlations_subscribed, "top_positive_correlations3.csv", row.names = FALSE)
+
+# Write top negative correlations to a CSV file
+write.csv(top_negative_correlations_subscribed, "top_negative_correlations3.csv", row.names = FALSE)
+head(suds_clean_2df_scaled)
+
+#---------------------------- Univariate Analysis 1
+
+# Create a histogram for 'credit_cards'
+hist(suds_clean_2df_scaled[,"credit_cards"], main = "Histogram of Credit Cards", xlab = "Credit Cards")
+
+# Create a histogram for 'days_since_contact'
+hist(suds_clean_2df_scaled[,"days_since_contact"], main = "Histogram of Days Since Contact", xlab = "Days Since Contact")
+
+# Save 'credit_cards' histogram
+png(filename = "histogram_credit_cards2.png")
+hist(suds_clean_2df_scaled[,"credit_cards"], main = "Histogram of Credit Cards", xlab = "Credit Cards")
+dev.off()
+
+# Save 'days_since_contact' histogram
+png(filename = "histogram_days_since_contact2.png")
+hist(suds_clean_2df_scaled[,"days_since_contact"], main = "Histogram of Days Since Contact", xlab = "Days Since Contact")
+dev.off()
+
+# Create histograms for continuous variables
+hist(suds_clean_2df_scaled[,"age"], main="Histogram of Age", xlab="Age")
+hist(suds_clean_2df_scaled[,"salary"], main="Histogram of Salary", xlab="Salary")
+hist(suds_clean_2df_scaled[,"credit_cards"], main="Histogram of Credit Cards", xlab="Credit Cards")
+hist(suds_clean_2df_scaled[,"days_since_contact"], main="Histogram of Days Since Contact", xlab="Days Since Contact")
+
+#---------------------------- Univariate Analysis 2
+
+# Create a scatter plot for 'credit_cards' vs 'subscribed'
+plot(suds_clean_2df_scaled[,"credit_cards"], suds_clean_2df_scaled[,"subscribed"], 
+     main = "Scatterplot of Credit Cards vs Subscribed", 
+     xlab = "Credit Cards", ylab = "Subscribed")
+
+# Create a scatter plot for 'days_since_contact' vs 'subscribed'
+plot(suds_clean_2df_scaled[,"days_since_contact"], suds_clean_2df_scaled[,"subscribed"], 
+     main = "Scatterplot of Days Since Contact vs Subscribed", 
+     xlab = "Days Since Contact", ylab = "Subscribed")
+
+# Save 'credit_cards' vs 'subscribed' scatter plot
+png(filename = "scatterplot_credit_cards_vs_subscribed.png")
+plot(suds_clean_2df_scaled[,"credit_cards"], suds_clean_2df_scaled[,"subscribed"], 
+     main = "Scatterplot of Credit Cards vs Subscribed", 
+     xlab = "Credit Cards", ylab = "Subscribed")
+dev.off()
+
+# Save 'days_since_contact' vs 'subscribed' scatter plot
+png(filename = "scatterplot_days_since_contact_vs_subscribed2.png")
+plot(suds_clean_2df_scaled[,"days_since_contact"], suds_clean_2df_scaled[,"subscribed"], 
+     main = "Scatterplot of Days Since Contact vs Subscribed", 
+     xlab = "Days Since Contact", ylab = "Subscribed")
+dev.off()
+
+#---------------------------- Calculate Central tendency and variability
+
+# Calculate measures of central tendency and variability
+mean_vals <- colMeans(suds_clean_2df_scaled)
+median_vals <- apply(suds_clean_2df_scaled, 2, median)
+sd_vals <- apply(suds_clean_2df_scaled, 2, sd)
+var_vals <- apply(suds_clean_2df_scaled, 2, var)
+range_vals <- apply(suds_clean_2df_scaled, 2, range)
+
+# Create a bar plot for 'contact_type'
+barplot(table(as.factor(suds_clean_2df_scaled[,"contact_type"])))
+
+# Create a scatter plot for 'credit_cards' vs 'subscribed'
+plot(suds_clean_2df_scaled[,"credit_cards"], suds_clean_2df_scaled[,"subscribed"], 
+     main = "Scatterplot of Credit Cards vs Subscribed", 
+     xlab = "Credit Cards", ylab = "Subscribed")
+
+# Create a scatter plot for 'days_since_contact' vs 'subscribed'
+plot(suds_clean_2df_scaled[,"days_since_contact"], suds_clean_2df_scaled[,"subscribed"], 
+     main = "Scatterplot of Days Since Contact vs Subscribed", 
+     xlab = "Days Since Contact", ylab = "Subscribed")
+
+print(suds_clean_2df_scaled)
